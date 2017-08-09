@@ -1,0 +1,18 @@
+{
+  "name": "sscompare",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "empty-dir": "^0.2.1",
+    "express": "^4.15.3",
+    "node-resemble-js": "^0.2.0",
+    "pageres": "^4.5.1"
+  }
+}

@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SScompare</title>
+  <meta name="author" content="Robert Vilcu">
+  </head>
+  <body>
+  
+  <style>
+      body{font-family:Arial; margin:30px;}
+      index{display: block;margin:15px 0px;position: relative;}
+      index a{ color:#999; text-decoration: none; }
+      index.isDifferent{ color:red; cursor:pointer; }
+      .isDifferent:after{
+          content:'!';
+          position: absolute;
+          top:0px;
+          left:-15px;
+          color:#fff;
+          background-color:red;
+          text-align:center;
+          width:10px;
+          height:10px;
+          border-radius:50%;
+      }
+  </style>
+  
+  <button class="newIndex" style="padding:15px;">Create new index</button>
+  <button class="checkDiff" style="padding:15px;">Check the difference</button>
+  <br /><br />
+  <hr />
+  <div class="indexFiles">
+      <br />
+      <b>Index Data:</b><br /><br />
+      <index url="http://www.amazon.com" name="Homepage Amazon"></index>
+      <index url="http://www.google.com" name="Google.com"></index>
+  </div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+  
+  <script type="text/javascript">
+      
+    var indexData = [];
+      
+    if($('index')){
+        $('index').each(function(){
+            
+            var name = $(this).attr('name');
+            var url = $(this).attr('url');
+            
+            $(this).html('<span>'+name+'</span> => <a target="_blank" href="'+url+'">'+url+'</a>');
+            indexData.push({
+                name: name,
+                url: url
+            });
+        });
+    }  
+      
+    console.log(indexData);
+    
+    // Click to reindex
+    $('.newIndex').click(function(){
+        if( ! $(this).hasClass('disabled')){
+            if (confirm('Are you sure you want to re-index the screen shots?')) {
+
+                $('.newIndex').addClass('disabled').text('Building new index...');
+                $('.checkDiff').css('opacity','0.5').addClass('disabled');
+                
+                $.ajax({
+                    url: 'http://localhost:3000/newIndex',
+                    type: 'POST',
+                    data: {
+                        index: indexData
+                    },
+                    success: function(resp){
+                        console.log(resp);
+                        if(resp == 'Success'){
+                            $('.newIndex').text('Successfully created new index');
+                            setTimeout(function(){
+                                $('.newIndex').removeClass('disabled').text('Create new index');
+                                $('.checkDiff').css('opacity','1').removeClass('disabled');
+                            },3000);
+                        }else{
+                            $('.newIndex').text('Something went wrong. Please try again.');
+                            setTimeout(function(){
+                                $('.newIndex').removeClass('disabled').text('Create new index');
+                                $('.checkDiff').css('opacity','1').removeClass('disabled');
+                            },3000);
+                        }
+                    },
+                    error: function(resp){
+                        console.log(resp);
+                        $('.newIndex').text('Failed to create new index');
+                        setTimeout(function(){
+                            $('.newIndex').removeClass('disabled').text('Create new index');
+                            $('.checkDiff').css('opacity','1').removeClass('disabled');
+                        },3000);
+                    }
+                });  
+            }
+        }
+    });
+      
+    // Click to check diff
+    $('.checkDiff').click(function(){
+        if( ! $(this).hasClass('disabled')){
+
+            $('.checkDiff').addClass('disabled').text('Collecting fresh screenshots...');
+            $('.newIndex').css('opacity','0.5').addClass('disabled');
+
+            $.ajax({
+                url: 'http://localhost:3000/freshcopy',
+                type: 'POST',
+                data: {
+                    index: indexData
+                },
+                success: function(resp){
+                    console.log(resp);
+                    if(resp == 'Success'){
+                        $('.checkDiff').text('Successfully created new screenshots');
+                        setTimeout(checkDiff, 1000);
+                    }
+                },
+                error: function(resp){
+                    console.log(resp);
+                    $('.checkDiff').text('Failed to take new screenshots');
+                    setTimeout(function(){
+                        $('.checkDiff').removeClass('disabled').text('Check the difference');
+                        $('.newIndex').css('opacity','1').removeClass('disabled');
+                    },3000);
+                }
+            });  
+            
+        }
+    });
+      
+    
+    var checkDiff = function(){
+        
+        $('.checkDiff').text('Comparing indexes...');
+
+        $.ajax({
+            url: 'http://localhost:3000/compare',
+            type: 'GET',
+            success: function(resp){
+                console.log(resp);
+                $('.checkDiff').text('Successfully comparing!');
+                
+                setTimeout(function(){
+                    $('.checkDiff').removeClass('disabled').text('Check the difference');
+                    $('.newIndex').css('opacity','1').removeClass('disabled');
+                },2000);
+                
+                $(resp).each(function(i,diff){
+                     var fileName = diff.fileName.replace('.png','');
+                     if(diff.diff == 'different'){
+                         console.log(fileName + ' - is different');
+                         $('index[name="'+fileName+'"]').addClass('isDifferent');
+                     }else{
+                         $('index[name="'+fileName+'"]').removeClass('isDifferent');
+                     }
+                });
+            },
+            error: function(resp){
+                console.log(resp);
+                $('.checkDiff').text('Failed to take new screenshots');
+                setTimeout(function(){
+                    $('.checkDiff').removeClass('disabled').text('Check the difference');
+                    $('.newIndex').css('opacity','1').removeClass('disabled');
+                },3000);
+            }
+        });  
+  
+    }
+    
+    $(document).on('click', '.isDifferent span', function(){
+        window.open("http://localhost:3000/"+$(this).text()+".png");
+    });
+      
+
+  </script>
+  
+  </body>
+</html>

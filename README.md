@@ -17,5 +17,5 @@ Navigate to  [localhost:3000](http://localhost:3000)
 - Change the test websites inside index.html
 
 ```sh
-<index url="url" name="Website"><span>Website</span> => <a target="_blank" href="url">url</a></index>
+<index url="pageUrl" name="Page Name"></index>
 ```

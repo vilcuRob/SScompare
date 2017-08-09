@@ -1,0 +1,2 @@
+# SScompare
+Screen Shot Compare

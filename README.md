@@ -11,6 +11,11 @@ npm install -d
 node server
 ```
 
+### Dependencies
+Uses [PhantomJS](http://phantomjs.org/)
+
+
+### How to use demo
 Navigate to  [localhost:3000](http://localhost:3000)
 - Click on 'Create new index'
 - After the process is done - click on 'Check the difference'
